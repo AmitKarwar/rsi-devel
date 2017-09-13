@@ -48,8 +48,10 @@ static void rsi_coex_sched_tx_pkts(struct rsi_coex_ctrl_block *coex_cb)
 			break;
 		}
 
-		if (coex_q == RSI_COEX_Q_BT)
+		if (coex_q == RSI_COEX_Q_BT) {
 			skb = skb_dequeue(&coex_cb->coex_tx_qs[RSI_COEX_Q_BT]);
+			rsi_send_bt_pkt(coex_cb->priv, skb);
+		}
 	}
 }
 

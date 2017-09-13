@@ -13,7 +13,7 @@ if WLAN_VENDOR_RSI
 
 config RSI_91X
 	tristate "Redpine Signals Inc 91x WLAN driver support"
-	depends on MAC80211
+	depends on MAC80211 && BT_RSI
 	---help---
 	  This option enabes support for RSI 1x1 devices.
 	  Select M (recommended), if you have a RSI 1x1 wireless module.
