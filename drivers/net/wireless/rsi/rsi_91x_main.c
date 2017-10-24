@@ -197,8 +197,8 @@ int rsi_read_pkt(struct rsi_common *common, u8 *rx_pkt, s32 rcv_pkt_len)
 					      (frame_desc + offset),
 					      length,
 					      extended_desc);
-			if (skb == NULL)
-				goto fail;
+			if (!skb)
+				return -ENOMEM;
 
 			rsi_indicate_pkt_to_os(common, skb);
 			break;
@@ -226,16 +226,13 @@ int rsi_read_pkt(struct rsi_common *common, u8 *rx_pkt, s32 rcv_pkt_len)
 		default:
 			rsi_dbg(ERR_ZONE, "%s: pkt from invalid queue: %d\n",
 				__func__,   queueno);
-			goto fail;
+			return -EINVAL;
 		}
-
 		index  += actual_length;
 		rcv_pkt_len -= actual_length;
 	} while (rcv_pkt_len > 0);
 
 	return 0;
-fail:
-	return -EINVAL;
 }
 EXPORT_SYMBOL_GPL(rsi_read_pkt);
 
