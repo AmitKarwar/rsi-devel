@@ -29,43 +29,33 @@ void rsi_usb_rx_thread(struct rsi_common *common)
 {
 	struct rsi_hw *adapter = common->priv;
 	struct rsi_91x_usbdev *dev = (struct rsi_91x_usbdev *)adapter->rsi_dev;
-	struct rx_usb_ctrl_block *rx_cb;
-	int status, idx;
+	int status;
+	struct sk_buff *skb;
 
 	do {
 		rsi_wait_event(&dev->rx_thread.event, EVENT_WAIT_FOREVER);
+		rsi_reset_event(&dev->rx_thread.event);
 
-		if (atomic_read(&dev->rx_thread.thread_done))
-			goto out;
+		while (true) {
+			if (atomic_read(&dev->rx_thread.thread_done))
+				goto out;
 
-		for (idx = 0; idx < MAX_RX_URBS; idx++) {
-			rx_cb = &dev->rx_cb[idx];
-			if (!rx_cb->pend)
-				continue;
+			skb = skb_dequeue(&dev->rx_q);
+			if (!skb)
+				break;
 
-			mutex_lock(&common->rx_lock);
-			status = rsi_read_pkt(common, rx_cb->rx_buffer, 0);
+			status = rsi_read_pkt(common, skb->data, 0);
 			if (status) {
 				rsi_dbg(ERR_ZONE, "%s: Failed To read data",
-					__func__);
-				mutex_unlock(&common->rx_lock);
+						__func__);
 				break;
 			}
-			rx_cb->pend = 0;
-			mutex_unlock(&common->rx_lock);
-
-			if (adapter->rx_urb_submit(adapter, rx_cb->ep_num)) {
-				rsi_dbg(ERR_ZONE,
-					"%s: Failed in urb submission",
-					__func__);
-				return;
-			}
 		}
-		rsi_reset_event(&dev->rx_thread.event);
 	} while (1);
 
 out:
 	rsi_dbg(INFO_ZONE, "%s: Terminated thread\n", __func__);
+	skb_queue_purge(&dev->rx_q);
 	complete_and_exit(&dev->rx_thread.completion, 0);
 }
 
