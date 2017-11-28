@@ -41,8 +41,6 @@ static void rsi_coex_sched_tx_pkts(struct rsi_coex_ctrl_block *coex_cb)
 
 	while (1) {
 		coex_q = rsi_coex_determine_coex_q(coex_cb);
-		rsi_dbg(INFO_ZONE, "queue = %d\n", coex_q);
-
 		if (coex_q == RSI_COEX_Q_INVALID) {
 			rsi_dbg(DATA_TX_ZONE, "No more pkt\n");
 			break;
