@@ -338,6 +338,8 @@ struct rsi_hw *rsi_91x_init(u16 oper_mode)
 	common->oper_mode = oper_mode;
 	common->init_done = true;
 	adapter->device_model = RSI_DEV_9113;
+	adapter->reg_mode = rsi_reg;
+	rsi_dbg(INFO_ZONE, "Reg mode = %d\n", adapter->reg_mode);
 
 	/* Determine coex mode */
 	switch (common->oper_mode) {
