@@ -221,7 +221,7 @@ int rsi_read_pkt(struct rsi_common *common, u8 *rx_pkt, s32 rcv_pkt_len)
 				if (rsi_bt_ops.attach(common, &g_proto_ops))
 					rsi_dbg(ERR_ZONE,
 						"Failed to attach BT module\n");
-			} else {
+			} else if (common->bt_adapter) {
 				rsi_bt_ops.recv_pkt(common->bt_adapter,
 						    frame_desc + offset);
 			}
@@ -337,6 +337,8 @@ struct rsi_hw *rsi_91x_init(u16 oper_mode)
 	init_completion(&common->wlan_init_completion);
 	common->oper_mode = oper_mode;
 	common->init_done = true;
+	common->disc_in_prog = false;
+	common->bt_adapter = NULL;
 	adapter->device_model = RSI_DEV_9113;
 	adapter->reg_mode = rsi_reg;
 	rsi_dbg(INFO_ZONE, "Reg mode = %d\n", adapter->reg_mode);
@@ -403,8 +405,11 @@ void rsi_91x_deinit(struct rsi_hw *adapter)
 		skb_queue_purge(&common->tx_queue[ii]);
 
 	if (common->coex_mode > 1) {
+		if (common->bt_adapter) {
+			rsi_bt_ops.detach(common->bt_adapter);
+			common->bt_adapter = NULL;
+		}
 		rsi_coex_detach(common);
-		rsi_bt_ops.detach(common->bt_adapter);
 	}
 
 	common->init_done = false;
