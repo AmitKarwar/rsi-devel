@@ -1985,9 +1985,6 @@ int rsi_send_bgscan_params(struct rsi_common *common, int enable)
 
 	skb_put(skb, frame_len);
 
-	print_hex_dump(KERN_ERR, "BGSCAN params:", DUMP_PREFIX_OFFSET,
-		       16, 0, skb->data, skb->len, 0);
-
 	return rsi_send_internal_mgmt_frame(common, skb);
 }
 
@@ -2035,8 +2032,6 @@ int rsi_send_bgscan_probe_req(struct rsi_common *common)
 			RSI_WIFI_MGMT_Q);
 	skb_put(skb, frame_len + pbreq_len);
 
-	print_hex_dump(KERN_ERR, "BGSCAN probe:", DUMP_PREFIX_OFFSET,
-		       16, 0, skb->data, skb->len, 0);
 	return rsi_send_internal_mgmt_frame(common, skb);
 }
 
